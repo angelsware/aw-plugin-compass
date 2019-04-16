@@ -1,4 +1,4 @@
-# aw-plugin-sample
+# aw-plugin-compass
 
 Compass plugin for Angels' Ware rendering engine.
 
@@ -12,7 +12,7 @@ Add the **plugins** section the **config.json** file of your project.
 
 	"plugins":[
 		{
-			"repo":"https://github.com/angelsware/aw-plugin-sample.git",
+			"repo":"https://github.com/angelsware/aw-plugin-compass.git",
 			"tag":"0.1.0"
 		}
 	]
