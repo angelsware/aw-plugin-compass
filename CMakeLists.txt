@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 3.0)
 project(aw-plugin-compass)
 
+set(CMAKE_CXX_STANDARD 11)
+
 if("${target}" MATCHES "windows")
 	set(TARGET_WIN32 True)
 elseif("${target}" MATCHES "linux")
@@ -10,7 +12,7 @@ elseif("${target}" MATCHES "android")
 elseif("${target}" MATCHES "ios")
 	set(TARGET_IOS True)
 elseif("${target}" MATCHES "emscripten")
-	set(TARGET_EMSCRIPTEN "emscripten")
+	set(TARGET_EMSCRIPTEN True)
 else()
 	message(FATAL_ERROR "missing target. -Dtarget=<target> (windows,linux,android,ios,emscripten)")
 endif()
@@ -29,4 +31,4 @@ add_library("${PROJECT_NAME}" STATIC ${source_files} ${header_files})
 
 include_directories("$ENV{AW_HOME}/include")
 target_include_directories("${PROJECT_NAME}" PUBLIC "include")
-set_target_properties("${PROJECT_NAME}" PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib/${target})
+set_target_properties("${PROJECT_NAME}" PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../../lib/${target})
