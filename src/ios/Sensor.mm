@@ -7,13 +7,13 @@
 - (id)init {
 	self = [super init];
 
-	_locationManager = [[CLLocationManager alloc] init];
+	/*_locationManager = [[CLLocationManager alloc] init];
 	_locationManager.delegate = self;
 	_locationManager.desiredAccuracy = kCLLocationAccuracyBest;
 
 	if ([_locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)]) {
 		[_locationManager requestWhenInUseAuthorization];
-	}
+	}*/
 
 	return self;
 }
