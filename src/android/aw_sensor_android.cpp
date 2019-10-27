@@ -36,7 +36,7 @@ namespace Compass {
 	}
 
 	void CSensor_Android::onResume() {
-		if (jclass clazz = Platform::CJniFunction::getClass("com/angelsware/engine/Compass")) {
+		if (jclass clazz = Platform::CJniFunction::getClass("com/angelsware/compass/Sensor")) {
 			if (jmethodID method = Platform::CJniFunction::getMethod(clazz, "onResume", "()V")) {
 				Platform::CJni::getEnv()->CallStaticVoidMethod(clazz, method);
 			}
@@ -44,7 +44,7 @@ namespace Compass {
 	}
 
 	void CSensor_Android::onStop() {
-		if (jclass clazz = Platform::CJniFunction::getClass("com/angelsware/engine/Compass")) {
+		if (jclass clazz = Platform::CJniFunction::getClass("com/angelsware/compass/Sensor")) {
 			if (jmethodID method = Platform::CJniFunction::getMethod(clazz, "onStop", "()V")) {
 				Platform::CJni::getEnv()->CallStaticVoidMethod(clazz, method);
 			}
