@@ -1,37 +1,46 @@
 package com.angelsware.compass;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
-
 import android.content.Context;
-import android.hardware.SensorListener;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
 import com.angelsware.engine.AppActivity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Sensor {
 	public static native void onCompassSensorChanged(float azimuth, float pitch, float roll, long listener);
 	public static native void onCompassSensorAccuracyChanged(int accuracy, long listener);
 
-	private static List sListeners = new ArrayList();
+	private static List<Long> sListeners = new ArrayList<>();
 
 	private static SensorManager sSensorManager;
-	private static final SensorListener sListener = new SensorListener() {
-		public void onSensorChanged(int sensor, float[] values) {
-			if (sensor == SensorManager.SENSOR_ORIENTATION) {
-				for (Iterator<Long> i = sListeners.iterator(); i.hasNext();) {
-					Long listener = i.next();
-					onCompassSensorChanged(values[0], values[1], values[2], (long)listener);
+	private static android.hardware.Sensor sRotationVectorSensor;
+
+	private static final SensorEventListener sSensorEventListener = new SensorEventListener() {
+		@Override
+		public void onSensorChanged(SensorEvent sensorEvent) {
+			if (sensorEvent.sensor.getType() == android.hardware.Sensor.TYPE_ROTATION_VECTOR) {
+				float[] rotationMatrix = new float[16];
+				SensorManager.getRotationMatrixFromVector(rotationMatrix, sensorEvent.values);
+				float[] orientationValues = new float[3];
+				SensorManager.remapCoordinateSystem(rotationMatrix, SensorManager.AXIS_X, SensorManager.AXIS_Y, rotationMatrix);
+				SensorManager.getOrientation(rotationMatrix, orientationValues);
+				float azimuth = (float)Math.toDegrees(orientationValues[0]);
+
+				for (Long listener : sListeners) {
+					onCompassSensorChanged(azimuth, 0, 0, (long) listener);
 				}
 			}
 		}
 
-		public void onAccuracyChanged(int sensor, int accuracy) {
-			if (sensor == SensorManager.SENSOR_ORIENTATION) {
-				for (Iterator<Long> i = sListeners.iterator(); i.hasNext();) {
-					Long listener = i.next();
-					onCompassSensorAccuracyChanged(accuracy, (long)listener);
+		@Override
+		public void onAccuracyChanged(android.hardware.Sensor sensor, int accuracy) {
+			if (sensor.getType() == android.hardware.Sensor.TYPE_ROTATION_VECTOR) {
+				for (Long listener : sListeners) {
+					onCompassSensorAccuracyChanged(accuracy, (long) listener);
 				}
 			}
 		}
@@ -51,13 +60,16 @@ public class Sensor {
 
 	public static void onCreate() {
 		sSensorManager = (SensorManager)(AppActivity.getActivity().getSystemService(Context.SENSOR_SERVICE));
+		if (sSensorManager != null) {
+			sRotationVectorSensor = sSensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_ROTATION_VECTOR);
+		}
 	}
 
 	public static void onResume() {
-		sSensorManager.registerListener(sListener, SensorManager.SENSOR_ORIENTATION, SensorManager.SENSOR_DELAY_GAME);
+		sSensorManager.registerListener(sSensorEventListener, sRotationVectorSensor, SensorManager.SENSOR_DELAY_GAME);
 	}
 
 	public static void onStop() {
-		sSensorManager.unregisterListener(sListener);
+		sSensorManager.unregisterListener(sSensorEventListener);
 	}
 }
