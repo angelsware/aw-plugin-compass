@@ -9,6 +9,10 @@ namespace Compass {
 	class CSensor_Ios
 		: public ISensor
 	{
+	public:
+		CSensor_Ios();
+		~CSensor_Ios();
+
 	private:
 		// ISensor
 		void addListener(ISensorListener* listener) override;
@@ -17,6 +21,8 @@ namespace Compass {
 		void onCreate() override;
 		void onResume() override;
 		void onStop() override;
+
+		void* mSensor;
 	};
 }
 
