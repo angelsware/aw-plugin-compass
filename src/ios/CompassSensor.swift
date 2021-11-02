@@ -36,7 +36,7 @@ class CompassSensor: NSObject, CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
         // TODO: x and y is probably not correct.
         listeners.forEach { listener in
-            CompassDelegate.onCompassSensorChanged(listener, azimuth: Float(newHeading.trueHeading), pitch: Float(newHeading.x), roll: Float(newHeading.z))
+            CompassDelegate.onCompassSensorChanged(listener, azimuth: Float(newHeading.trueHeading), pitch: Float(newHeading.y * 2.0), roll: Float(newHeading.x * 2.0))
         }
     }
 }
