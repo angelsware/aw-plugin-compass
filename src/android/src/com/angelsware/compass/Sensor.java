@@ -29,9 +29,11 @@ public class Sensor {
 				SensorManager.remapCoordinateSystem(rotationMatrix, SensorManager.AXIS_X, SensorManager.AXIS_Y, rotationMatrix);
 				SensorManager.getOrientation(rotationMatrix, orientationValues);
 				float azimuth = (float)Math.toDegrees(orientationValues[0]);
+				float pitch = (float)Math.toDegrees(orientationValues[1]);
+				float roll = (float)Math.toDegrees(orientationValues[2]);
 
 				for (Long listener : sListeners) {
-					onCompassSensorChanged(azimuth, 0, 0, (long) listener);
+					onCompassSensorChanged(azimuth, pitch, roll, (long) listener);
 				}
 			}
 		}
