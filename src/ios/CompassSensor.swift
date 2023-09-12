@@ -1,9 +1,13 @@
 import CoreLocation
+import CoreMotion
 
 class CompassSensor: NSObject, CLLocationManagerDelegate {
     private var listeners: Set<Int64> = Set()
     private var locationManager: CLLocationManager?
+    private var motionManager: CMMotionManager?
     private var requestingUpdates = false
+    private var timer: Timer?
+    private var azimuth = 0.0
     
     func addListener(listener: Int64) {
         listeners.insert(listener)
@@ -23,21 +27,38 @@ class CompassSensor: NSObject, CLLocationManagerDelegate {
         locationManager?.distanceFilter = 1000
         locationManager?.desiredAccuracy = kCLLocationAccuracyBest
         locationManager?.delegate = self
+
+        motionManager = CMMotionManager()
+        motionManager?.deviceMotionUpdateInterval = 1.0 / 50.0
+        motionManager?.showsDeviceMovementDisplay = true
+        motionManager?.startDeviceMotionUpdates(using: .xMagneticNorthZVertical)
+        let s = self
+        self.timer = Timer(fire: Date(), interval: (1.0 / 50.0), repeats: true, block: { (self) in
+            if let data = s.motionManager?.deviceMotion {
+                let x = data.attitude.pitch * 180.0 / Double.pi
+                let y = data.attitude.roll * 180.0 / Double.pi
+                let z = data.attitude.yaw * 180.0 / Double.pi
+                s.listeners.forEach { listener in
+                    CompassDelegate.onCompassSensorChanged(listener, azimuth: Float(s.azimuth), pitch: Float(-x), roll: Float(y))
+                }
+            }
+        })
+
+        RunLoop.current.add(self.timer!, forMode: RunLoop.Mode.defaultRunLoopMode)
     }
 
     func onResume() {
         locationManager?.startUpdatingHeading()
+        motionManager?.startDeviceMotionUpdates(using: .xMagneticNorthZVertical)
     }
 
     func onStop() {
         locationManager?.stopUpdatingHeading()
+        motionManager?.stopDeviceMotionUpdates()
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
-        // TODO: x and y is probably not correct.
-        listeners.forEach { listener in
-            CompassDelegate.onCompassSensorChanged(listener, azimuth: Float(newHeading.trueHeading), pitch: Float(newHeading.y * 2.0), roll: Float(newHeading.x * 2.0))
-        }
+        self.azimuth = newHeading.trueHeading
     }
 }
 
